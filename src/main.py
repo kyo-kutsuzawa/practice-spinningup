@@ -47,7 +47,7 @@ def main():
                 observation, reward, done, info = env.step(action)
 
                 if done:
-                    print('Episode finished after {} timesteps'.format(t+1))
+                    print('Episode {:4d} finished after {:3} timesteps'.format(e+1, t+1))
                     break
 
                 if args.render:
