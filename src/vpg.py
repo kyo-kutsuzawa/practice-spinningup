@@ -17,13 +17,14 @@ def main():
     # Process commandline arguments
     parser = argparse.ArgumentParser(description="Example of Gym + PyTorch")
     parser.add_argument('--mode', choices=['train', 'test'], default='train', help='Whether training or test')
-    parser.add_argument('--n-episodes', type=int, default=1000, help='Number of episodes')
+    parser.add_argument('--epochs', type=int, default=1000, help='Number of training epochs')
+    parser.add_argument('--steps-per-epoch', type=int, default=2000, help='Number of steps in an epoch')
     parser.add_argument('--max-steps', type=int, default=200, help='Number of max. steps for an episode')
     parser.add_argument('--render', action='store_true', help='If specified, render the environment')
     parser.add_argument('--out', type=str, default='results', help='Output directory')
     args = parser.parse_args()
 
-    # Define settings
+    # Choose an environment
     env_name = 'Pendulum-v0'
 
     # Setup parameters
@@ -34,12 +35,10 @@ def main():
     vpg_params = {
         'env_fn': lambda: wrappers.Monitor(gym.make(env_name), directory=args.out, force=True),
         'ac_kwargs': model_params,
-        'seed': 0,
-        'steps_per_epoch': 2000,
-        'epochs': args.n_episodes,
+        'seed': 0,  # Manually set a seed value for reproducibility
+        'steps_per_epoch': args.steps_per_epoch,
+        'epochs': args.epochs,
         'gamma': 0.9,
-        'pi_lr': 0.0003,
-        'vf_lr': 0.001,
         'max_ep_len': args.max_steps,
         'logger_kwargs': dict(output_dir=args.out)
     }
@@ -53,10 +52,10 @@ def main():
     data = pd.read_table(os.path.join(args.out,'progress.txt'))
 
     # Make a graph of reward progress
-    plt.plot(np.array(list(range(args.n_episodes)))+1, data['AverageEpRet'])
+    plt.plot(np.array(list(range(args.epochs)))+1, data['AverageEpRet'])
     plt.xlabel('Episode')
     plt.ylabel('Reward')
-    plt.xlim((1, args.n_episodes))
+    plt.xlim((1, args.epochs))
     plt.show()
 
 
