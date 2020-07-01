@@ -36,10 +36,22 @@ def main():
         return env
 
     # Setup parameters
-    model_params = {
-        'hidden_sizes': (64, 64),
-        'activation': nn.Tanh
-    }
+    if args.model == 'model1':
+        model_params = {
+            'hidden_sizes': (64, 64),
+            'activation': nn.Tanh
+        }
+    elif args.model == 'model2':
+        model_params = {
+            'hidden_sizes': (32,),
+            'activation': nn.Tanh
+        }
+    elif args.model == 'model3':
+        model_params = {
+            'hidden_sizes': (128, 128, 128, 128),
+            'activation': nn.Tanh
+        }
+
     vpg_params = {
         'env_fn': make_env,
         'ac_kwargs': model_params,
