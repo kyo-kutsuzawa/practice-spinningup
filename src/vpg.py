@@ -16,16 +16,24 @@ def main():
 
     # Process commandline arguments
     parser = argparse.ArgumentParser(description="Example of Gym + PyTorch")
-    parser.add_argument('--mode', choices=['train', 'test'], default='train', help='Whether training or test')
-    parser.add_argument('--epochs', type=int, default=1000, help='Number of training epochs')
-    parser.add_argument('--steps-per-epoch', type=int, default=2000, help='Number of steps in an epoch')
-    parser.add_argument('--max-steps', type=int, default=200, help='Number of max. steps for an episode')
-    parser.add_argument('--render', action='store_true', help='If specified, render the environment')
-    parser.add_argument('--out', type=str, default='results', help='Output directory')
+    parser.add_argument('--model',           choices=['model1', 'model2', 'model3'], default='model1', help='Whether model to use')
+    parser.add_argument('--render',          action='store_true',         help='If specified, render the environment')
+    parser.add_argument('--out',             type=str,   default='results/result', help='Output directory')
+    parser.add_argument('--steps-per-epoch', type=int,   default=4000,   help='Number of steps in an epoch')
+    parser.add_argument('--epochs',          type=int,   default=1000,   help='Number of training epochs')
+    parser.add_argument('--gamma',           type=float, default=0.99,   help='')
+    parser.add_argument('--pi_lr',           type=float, default=0.0003, help='')
+    parser.add_argument('--vf_lr',           type=float, default=0.001,  help='')
+    parser.add_argument('--train_v_iters',   type=int,   default=80,     help='')
+    parser.add_argument('--lam',             type=float, default=0.97,   help='')
+    parser.add_argument('--max-ep-len',      type=int,   default=1000,   help='Number of max. steps for an episode')
     args = parser.parse_args()
 
-    # Choose an environment
-    env_name = 'Pendulum-v0'
+    def make_env():
+        env_name = 'Pendulum-v0'
+        env = gym.make(env_name)
+        wrappers.Monitor(env, directory=args.out, force=True)
+        return env
 
     # Setup parameters
     model_params = {
@@ -33,13 +41,17 @@ def main():
         'activation': nn.Tanh
     }
     vpg_params = {
-        'env_fn': lambda: wrappers.Monitor(gym.make(env_name), directory=args.out, force=True),
+        'env_fn': make_env,
         'ac_kwargs': model_params,
         'seed': 0,  # Manually set a seed value for reproducibility
         'steps_per_epoch': args.steps_per_epoch,
         'epochs': args.epochs,
-        'gamma': 0.9,
-        'max_ep_len': args.max_steps,
+        'gamma': args.gamma,
+        'pi_lr': args.pi_lr,
+        'vf_lr': args.vf_lr,
+        'train_v_iters': args.train_v_iters,
+        'lam': args.lam,
+        'max_ep_len': args.max_ep_len,
         'logger_kwargs': dict(output_dir=args.out)
     }
     from spinup.utils.run_utils import setup_logger_kwargs
