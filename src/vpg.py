@@ -22,13 +22,14 @@ def main():
     parser.add_argument('--steps-per-epoch', type=int,   default=4000,   help='Number of steps in an epoch')
     parser.add_argument('--epochs',          type=int,   default=1000,   help='Number of training epochs')
     parser.add_argument('--gamma',           type=float, default=0.99,   help='')
-    parser.add_argument('--pi_lr',           type=float, default=0.0003, help='')
-    parser.add_argument('--vf_lr',           type=float, default=0.001,  help='')
-    parser.add_argument('--train_v_iters',   type=int,   default=80,     help='')
+    parser.add_argument('--pi-lr',           type=float, default=0.0003, help='')
+    parser.add_argument('--vf-lr',           type=float, default=0.001,  help='')
+    parser.add_argument('--train-v-iters',   type=int,   default=80,     help='')
     parser.add_argument('--lam',             type=float, default=0.97,   help='')
     parser.add_argument('--max-ep-len',      type=int,   default=1000,   help='Number of max. steps for an episode')
     args = parser.parse_args()
 
+    # Environment-making function
     def make_env():
         env_name = 'Pendulum-v0'
         env = gym.make(env_name)
@@ -52,6 +53,7 @@ def main():
             'activation': nn.Tanh
         }
 
+    # Setup VPG parameters
     vpg_params = {
         'env_fn': make_env,
         'ac_kwargs': model_params,
@@ -72,10 +74,8 @@ def main():
     # Run VPG
     vpg(**vpg_params)
 
-    # Get scores from last five epochs to evaluate success.
+    # Make a reward-progress graph
     data = pd.read_table(os.path.join(args.out,'progress.txt'))
-
-    # Make a graph of reward progress
     plt.plot(np.array(list(range(args.epochs)))+1, data['AverageEpRet'])
     plt.xlabel('Episode')
     plt.ylabel('Reward')
@@ -85,4 +85,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
